@@ -22,10 +22,10 @@ namespace NZWalks.API.Controllers
         
 
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
             //Get Data From Database -Domain Models
-            var regionsDomain = dbContext.Regions.ToList();
+            var regionsDomain = await dbContext.Regions.ToListAsync();
             //Map Domain Models to DTOs
             var regionsDto = new List<RegionDto>();
             foreach (var regionDomain in regionsDomain)
@@ -47,7 +47,7 @@ namespace NZWalks.API.Controllers
 
         //get single region(get region by id)
         [HttpGet("{id:Guid}")]
-        public IActionResult GetById(Guid id)//because ur id is guid
+        public async Task<IActionResult> GetById(Guid id)//because ur id is guid
         {
             //var region = dbContext.regions.Find(id);
             
@@ -56,7 +56,7 @@ namespace NZWalks.API.Controllers
             //we can use FirstOrDefault instead of .Find so wecan pass any id we want if we add Find(id) we must pass id what is there in db
             //find method only takes primary key
             //Get Region Domain model from Databaes
-            var regionDomain = dbContext.Regions.FirstOrDefault(x => x.Id == id);
+            var regionDomain = await dbContext.Regions.FirstOrDefaultAsync(x => x.Id == id);
             // in this method we can use code name anything is there it must there in route also
             if (regionDomain == null)
             {
@@ -77,7 +77,7 @@ namespace NZWalks.API.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create([FromBody] AddRegionRequestDto addRegionRequestDto)
+        public async Task<IActionResult> Create([FromBody] AddRegionRequestDto addRegionRequestDto)
         {
             // Map or Conver DTO to Domain Model
             var regionDomainModel = new Region
@@ -88,8 +88,8 @@ namespace NZWalks.API.Controllers
             };
 
             // Use Domain Model to Create Region
-            dbContext.Regions.Add(regionDomainModel);
-            dbContext.SaveChanges();
+            await dbContext.Regions.AddAsync(regionDomainModel);
+            await dbContext.SaveChangesAsync();
 
             // Map Domain model back to DTO
             var regionDto = new RegionDto
@@ -107,10 +107,10 @@ namespace NZWalks.API.Controllers
         // PUT
         [HttpPut]
         [Route("{id:Guid}")]
-        public IActionResult Update([FromRoute] Guid id, [FromBody] UpdateRegionRequestDtocs updateRegionRequestDtocs)
+        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateRegionRequestDtocs updateRegionRequestDtocs)
         {
             // Check  if region exists
-            var regionDomainModel = dbContext.Regions.FirstOrDefault(x => x.Id == id);
+            var regionDomainModel = await dbContext.Regions.FirstOrDefaultAsync(x => x.Id == id);
 
             if(regionDomainModel == null)
             {
@@ -122,7 +122,7 @@ namespace NZWalks.API.Controllers
             regionDomainModel.Name = updateRegionRequestDtocs.Name;
             regionDomainModel.RegionImageUrl = updateRegionRequestDtocs.RegionImageUrl;
 
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync();
 
             // Conver Domain Model to DTO
             var regionDto = new RegionDto
@@ -139,9 +139,9 @@ namespace NZWalks.API.Controllers
         // Delete Region
         // DELETE:
         [HttpDelete("{id:Guid}")]
-        public IActionResult Delete([FromRoute] Guid id)
+        public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
-            var regionDomainModel = dbContext.Regions.FirstOrDefault(x => x.Id == id);
+            var regionDomainModel = await dbContext.Regions.FirstOrDefaultAsync(x => x.Id == id);
 
             if(regionDomainModel == null)
             {
@@ -149,8 +149,8 @@ namespace NZWalks.API.Controllers
             }
 
             // Delete region
-            dbContext.Regions.Remove(regionDomainModel);
-            dbContext.SaveChanges();
+            dbContext.Regions.Remove(regionDomainModel); // remove doesn't have async method
+            await dbContext.SaveChangesAsync();
 
             // return deleted Region back
             // Map Domain Model to DTO
